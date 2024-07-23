@@ -31,7 +31,17 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define MCP_IODIR		0x00
+#define MCP_IPOL		0x01
+#define MCP_GPINTEN		0x02
+#define MCP_DEFVAL		0x03
+#define MCP_INTCON		0x04
+#define MCP_IOCON		0x05
+#define MCP_GPPU		0x06
+#define MCP_INTF		0x07
+#define MCP_INTCAP		0x08
+#define MCP_GPIO		0x09
+#define MCP_OLAT		0x0A
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,7 +66,15 @@ static void MX_SPI2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void mcp_reg_write(uint8_t reg, uint8_t value) {
 
+	uint8_t tx[3] = { 0x40, reg, value };
+
+	HAL_GPIO_WritePin(IOEXP_CS_GPIO_Port, IOEXP_CS_Pin, GPIO_PIN_RESET);
+	HAL_SPI_Transmit(&hspi2, tx, 3, HAL_MAX_DELAY);
+	HAL_GPIO_WritePin(IOEXP_CS_GPIO_Port, IOEXP_CS_Pin, GPIO_PIN_SET);
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -90,6 +108,9 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+  //Ustaw GP0 jako wyjscie:
+  mcp_reg_write(MCP_IODIR, 0xFE);
+
 
   /* USER CODE END 2 */
 
@@ -97,6 +118,16 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+	  // włącz diodę
+	  mcp_reg_write(MCP_OLAT, 0x01);
+
+	  HAL_Delay(500);
+
+	  // wyłącz diodę
+	  mcp_reg_write(MCP_OLAT, 0x00);
+
+	  HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
